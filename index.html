@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<script src="./bundle.js"></script>
+
+<script>
+  function getLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showPosition, showError);
+    } else {
+      alert("此設備不支援定位服務");
+    }
+  }
+  
+  function showPosition(position) {
+    var latlon = position.coords.latitude + "," + position.coords.longitude;
+    if(confirm("設備座標:"+latlon+"\n按「確定」:填入座標1\n按「取消」:填入座標2") == true){
+      document.getElementById("input1").value = latlon;
+    } else {
+      document.getElementById("input2").value = latlon;
+    }
+
+  }
+  
+  function showError(error) {
+    switch(error.code) {
+      case error.PERMISSION_DENIED:
+        alert("使用者拒絕提供位置資訊");
+        break;
+      case error.POSITION_UNAVAILABLE:
+        alert("無法取得位置資訊");
+        break;
+      case error.TIMEOUT:
+        alert("取得位置資訊逾時");
+        break;
+      case error.UNKNOWN_ERROR:
+        alert("發生未知錯誤");
+        break;
+    }
+  }
+
+  function clean() {
+    document.getElementById("input1").value="";
+    document.getElementById("input2").value="";
+    document.getElementById("inputkm").value="";
+  }
+
+  function ok() {
+  const input1 = document.getElementById("input1").value;
+  const input2 = document.getElementById("input2").value;
+  const inputKm = document.getElementById("inputkm");
+
+  if (input1 && input2) {
+    const [lat1, lon1] = input1.split(",").map(parseFloat);
+    const [lat2, lon2] = input2.split(",").map(parseFloat);
+    const distance = calculateDistance(lat1, lon1, lat2, lon2);
+    inputKm.value = distance.toFixed(3);
+    const cooldownTime = calculateCooldownTime(distance);
+    displayCooldownTime(cooldownTime);
+  }
+
+  else if (inputKm.value) {
+    const distance = parseFloat(inputKm.value);
+    const cooldownTime = calculateCooldownTime(distance);
+    displayCooldownTime(cooldownTime);
+  } else {
+    alert("請輸入座標或距離");
+  }
+}
+
+function displayCooldownTime(cooldownTime) {
+  const cooldownElement = document.getElementById("cooldown");
+  cooldownElement.textContent = `冷却时间: ${cooldownTime} 分钟`;
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const earthRadiusKm = 6371;
+
+  const lat1Rad = toRadians(lat1);
+  const lon1Rad = toRadians(lon1);
+  const lat2Rad = toRadians(lat2);
+  const lon2Rad = toRadians(lon2);
+
+  const dLat = lat2Rad - lat1Rad;
+  const dLon = lon2Rad - lon1Rad;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = earthRadiusKm * c;
+
+  return distance;
+}
+
+function toRadians(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
+function calculateCooldownTime(distance) {
+  const cooldownTable = [
+    { distance: 1, cooldown: 1 },
+    { distance: 2, cooldown: 1 },
+    { distance: 4, cooldown: 2 },
+    { distance: 10, cooldown: 8 },
+    { distance: 12, cooldown: 9 },
+    { distance: 15, cooldown: 11 },
+    { distance: 20, cooldown: 13 },
+    { distance: 25, cooldown: 15 },
+    { distance: 30, cooldown: 18 },
+    { distance: 40, cooldown: 22 },
+    { distance: 45, cooldown: 23 },
+    { distance: 60, cooldown: 25 },
+    { distance: 80, cooldown: 27 },
+    { distance: 100, cooldown: 30 },
+    { distance: 125, cooldown: 33 },
+    { distance: 140, cooldown: 34 },
+    { distance: 150, cooldown: 36 },
+    { distance: 180, cooldown: 39 },
+    { distance: 200, cooldown: 42 },
+    { distance: 250, cooldown: 46 },
+    { distance: 300, cooldown: 50 },
+    { distance: 350, cooldown: 53 },
+    { distance: 400, cooldown: 56 },
+    { distance: 500, cooldown: 64 },
+    { distance: 600, cooldown: 72 },
+    { distance: 750, cooldown: 82 },
+    { distance: 800, cooldown: 86 },
+    { distance: 900, cooldown: 93 },
+    { distance: 950, cooldown: 97 },
+    { distance: 1000, cooldown: 100 },
+    { distance: 1150, cooldown: 111 },
+    { distance: 1200, cooldown: 115 },
+    { distance: 1250, cooldown: 118 },
+    { distance: 1266, cooldown: 120 }, // max
+  ];
+
+  let cooldownTime = 0;
+  for (const entry of cooldownTable) {
+    if (distance <= entry.distance) {
+      cooldownTime = entry.cooldown;
+      break;
+    }
+  }
+
+  return cooldownTime;
+}
+</script>
+
+<body>
+  <div class="container">
+    <div>
+      <label for="input1">座標1</label>
+      <md-outlined-text-field label="輸入: xx.xx, yy.yy" id="input1"></md-outlined-text-field>
+    </div>
+    <br>
+    <div>
+      <label for="input2">座標2</label>
+      <md-outlined-text-field label="輸入: xx.xx, yy.yy" id="input2"></md-outlined-text-field>
+    </div>
+    <br>
+    <div>
+      <label for="inputkm">距離:</label>
+      <md-outlined-text-field type="number" label="輸入:數字(單位:km)" id="inputkm"></md-outlined-text-field>
+    </div>
+    <br>
+    <div>
+      <md-filled-tonal-button onclick="getLocation()">
+        取得設備座標
+        <span class="material-symbols-outlined">add_location_alt</span>
+      </md-filled-tonal-button>
+      <md-filled-button checked id="ok" onclick="ok()">計算</md-filled-button>
+      <md-outlined-button checked id="clean" onclick="clean()">清除</md-outlined-button>
+      <h1 id="cooldown"></h1>
+    </div>
+  </div>
+</body>
+</html>

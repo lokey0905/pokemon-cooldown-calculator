@@ -6,13 +6,36 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 
 <script src="./bundle.js"></script>
 
 <script>
+  function getScreenSize() {
+    const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    const screenHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+
+    return { width: screenWidth, height: screenHeight };
+  }
+
+  function adjustComponentSize() {
+    const screenSize = getScreenSize();
+    const container = document.querySelector('.container');
+
+    if (screenSize.width > screenSize.height) {
+      container.style.width = '60%'; 
+    } else {
+      container.style.width = '80%'; 
+    }
+  }
+
+  window.addEventListener('resize', adjustComponentSize);
+
+  adjustComponentSize();
+
+
   function getLocation() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(showPosition, showError);
@@ -79,7 +102,7 @@
 
 function displayCooldownTime(cooldownTime) {
   const cooldownElement = document.getElementById("cooldown");
-  cooldownElement.textContent = `冷却时间: ${cooldownTime} 分钟`;
+  cooldownElement.textContent = `冷卻時間: ${cooldownTime} 分鐘`;
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -144,6 +167,7 @@ function calculateCooldownTime(distance) {
   ];
 
   let cooldownTime = 0;
+  if (distance<0) distance = -1 * distance;    
   for (const entry of cooldownTable) {
     if (distance <= entry.distance) {
       cooldownTime = entry.cooldown;
@@ -158,29 +182,32 @@ function calculateCooldownTime(distance) {
 <body>
   <div class="container">
     <div>
-      <label for="input1">座標1</label>
+      <label for="input1"><font>座標1</font></label>
       <md-outlined-text-field label="輸入: xx.xx, yy.yy" id="input1"></md-outlined-text-field>
     </div>
     <br>
     <div>
-      <label for="input2">座標2</label>
+      <label for="input2"><font>座標2</font></label>
       <md-outlined-text-field label="輸入: xx.xx, yy.yy" id="input2"></md-outlined-text-field>
     </div>
     <br>
     <div>
-      <label for="inputkm">距離:</label>
+      <label for="inputkm"><font>距離:</font></label>
       <md-outlined-text-field type="number" label="輸入:數字(單位:km)" id="inputkm"></md-outlined-text-field>
     </div>
     <br>
     <div>
-      <md-filled-tonal-button onclick="getLocation()">
-        取得設備座標
-        <span class="material-symbols-outlined">add_location_alt</span>
+      <md-filled-tonal-button class="full-button" onclick="getLocation()">
+        取得裝置位置
+        <svg slot="icon" viewBox="0 -960 960 960"><path d="M480-80Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q17 0 32.5 1.5T544-874v62q-15-4-31-6t-33-2q-109.417 0-184.708 75.105Q220-669.79 220-552q0 75 65 173.5T480-159q133-121 196.5-219.5T740-552q0-8-.5-16t-1.5-16h61q1 8 1 16v16q0 100-79.5 217.5T480-80Zm.089-410Q509-490 529.5-510.589q20.5-20.588 20.5-49.5Q550-589 529.411-609.5q-20.588-20.5-49.5-20.5Q451-630 430.5-609.411q-20.5 20.588-20.5 49.5Q410-531 430.589-510.5q20.588 20.5 49.5 20.5ZM480-560Zm252-84h60v-128h128v-60H792v-128h-60v128H604v60h128v128Z"/></svg>
       </md-filled-tonal-button>
-      <md-filled-button checked id="ok" onclick="ok()">計算</md-filled-button>
-      <md-outlined-button checked id="clean" onclick="clean()">清除</md-outlined-button>
-      <h1 id="cooldown"></h1>
     </div>
+    <br>
+    <div class="half-div">
+      <md-filled-button id="ok" onclick="ok()">計算</md-filled-button>
+      <md-outlined-button id="clean" onclick="clean()">清除</md-outlined-button>
+    </div>
+    <h1 id="cooldown"></h1>
   </div>
 </body>
 </html>

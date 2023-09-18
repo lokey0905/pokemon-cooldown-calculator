@@ -13,29 +13,6 @@
 <script src="./bundle.js"></script>
 
 <script>
-  function getScreenSize() {
-    const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-    const screenHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-
-    return { width: screenWidth, height: screenHeight };
-  }
-
-  function adjustComponentSize() {
-    const screenSize = getScreenSize();
-    const container = document.querySelector('.container');
-
-    if (screenSize.width > screenSize.height) {
-      container.style.width = '60%'; 
-    } else {
-      container.style.width = '80%'; 
-    }
-  }
-
-  window.addEventListener('resize', adjustComponentSize);
-
-  adjustComponentSize();
-
-
   function getLocation() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(showPosition, showError);

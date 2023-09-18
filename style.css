@@ -1,3 +1,15 @@
+@media screen and (orientation: portrait) {
+  .container {
+    width: 90%;
+  }
+}
+
+@media screen and (orientation: landscape) {
+  .container {
+    width: auto;
+  }
+}
+
 .container {
     position: absolute;
     top: 50%;

@@ -30,7 +30,6 @@
     } else {
       document.getElementById("input2").value = latlon;
     }
-
   }
   
   function showError(error) {
@@ -54,108 +53,114 @@
     document.getElementById("input1").value="";
     document.getElementById("input2").value="";
     document.getElementById("inputkm").value="";
+    document.getElementById("cooldown").textContent="";
+    document.getElementById("realtime").textContent="";
   }
 
   function ok() {
-  const input1 = document.getElementById("input1").value;
-  const input2 = document.getElementById("input2").value;
-  const inputKm = document.getElementById("inputkm");
+    const input1 = document.getElementById("input1").value;
+    const input2 = document.getElementById("input2").value;
+    const inputKm = document.getElementById("inputkm");
 
-  if (input1 && input2) {
-    const [lat1, lon1] = input1.split(",").map(parseFloat);
-    const [lat2, lon2] = input2.split(",").map(parseFloat);
-    const distance = calculateDistance(lat1, lon1, lat2, lon2);
-    inputKm.value = distance.toFixed(3);
-    const cooldownTime = calculateCooldownTime(distance);
-    displayCooldownTime(cooldownTime);
-  }
-
-  else if (inputKm.value) {
-    const distance = parseFloat(inputKm.value);
-    const cooldownTime = calculateCooldownTime(distance);
-    displayCooldownTime(cooldownTime);
-  } else {
-    alert("請輸入座標或距離");
-  }
-}
-
-function displayCooldownTime(cooldownTime) {
-  const cooldownElement = document.getElementById("cooldown");
-  cooldownElement.textContent = `冷卻時間: ${cooldownTime} 分鐘`;
-}
-
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const earthRadiusKm = 6371;
-
-  const lat1Rad = toRadians(lat1);
-  const lon1Rad = toRadians(lon1);
-  const lat2Rad = toRadians(lat2);
-  const lon2Rad = toRadians(lon2);
-
-  const dLat = lat2Rad - lat1Rad;
-  const dLon = lon2Rad - lon1Rad;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(dLon / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distance = earthRadiusKm * c;
-
-  return distance;
-}
-
-function toRadians(degrees) {
-  return degrees * (Math.PI / 180);
-}
-
-function calculateCooldownTime(distance) {
-  const cooldownTable = [
-    { distance: 1, cooldown: 1 },
-    { distance: 2, cooldown: 1 },
-    { distance: 4, cooldown: 2 },
-    { distance: 10, cooldown: 8 },
-    { distance: 12, cooldown: 9 },
-    { distance: 15, cooldown: 11 },
-    { distance: 20, cooldown: 13 },
-    { distance: 25, cooldown: 15 },
-    { distance: 30, cooldown: 18 },
-    { distance: 40, cooldown: 22 },
-    { distance: 45, cooldown: 23 },
-    { distance: 60, cooldown: 25 },
-    { distance: 80, cooldown: 27 },
-    { distance: 100, cooldown: 30 },
-    { distance: 125, cooldown: 33 },
-    { distance: 140, cooldown: 34 },
-    { distance: 150, cooldown: 36 },
-    { distance: 180, cooldown: 39 },
-    { distance: 200, cooldown: 42 },
-    { distance: 250, cooldown: 46 },
-    { distance: 300, cooldown: 50 },
-    { distance: 350, cooldown: 53 },
-    { distance: 400, cooldown: 56 },
-    { distance: 500, cooldown: 64 },
-    { distance: 600, cooldown: 72 },
-    { distance: 750, cooldown: 82 },
-    { distance: 800, cooldown: 86 },
-    { distance: 900, cooldown: 93 },
-    { distance: 950, cooldown: 97 },
-    { distance: 1000, cooldown: 100 },
-    { distance: 1150, cooldown: 111 },
-    { distance: 1200, cooldown: 115 },
-    { distance: 1250, cooldown: 118 },
-    { distance: 1266, cooldown: 120 }, // max
-  ];
-
-  let cooldownTime = 120;
-  if (distance<0) distance = -1 * distance;    
-  for (const entry of cooldownTable) {
-    if (distance <= entry.distance) {
-      cooldownTime = entry.cooldown;
-      break;
+    if (input1 && input2) {
+      const [lat1, lon1] = input1.split(",").map(parseFloat);
+      const [lat2, lon2] = input2.split(",").map(parseFloat);
+      const distance = calculateDistance(lat1, lon1, lat2, lon2);
+      inputKm.value = distance.toFixed(3);
+      
+      updateResults(distance);
+    } else if (inputKm.value) {
+      const distance = parseFloat(inputKm.value);
+      updateResults(distance);
+    } else {
+      alert("請輸入座標或距離");
     }
   }
 
-  return cooldownTime;
-}
+  // 更新顯示結果的封裝函數
+  function updateResults(distance) {
+    const cooldownTime = calculateCooldownTime(distance);
+    const realTime = calculateRealTravelTime(distance);
+    
+    document.getElementById("cooldown").textContent = `🎮 遊戲冷卻: ${cooldownTime}`;
+    document.getElementById("realtime").textContent = `🚶 真實移動: ${realTime}`;
+  }
+
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const earthRadiusKm = 6371;
+    const lat1Rad = toRadians(lat1);
+    const lon1Rad = toRadians(lon1);
+    const lat2Rad = toRadians(lat2);
+    const lon2Rad = toRadians(lon2);
+
+    const dLat = lat2Rad - lat1Rad;
+    const dLon = lon2Rad - lon1Rad;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return earthRadiusKm * c;
+  }
+
+  function toRadians(degrees) {
+    return degrees * (Math.PI / 180);
+  }
+
+  // 1. 遊戲冷卻時間邏輯 (同步搖桿 App 算法)
+  function calculateCooldownTime(distance) {
+    distance = Math.abs(distance);
+    if (distance < 0.01) return "0 秒";
+    if (distance < 0.1)  return "3 秒";
+    if (distance < 0.5)  return "15 秒";
+    if (distance < 1)    return "30 秒";
+    if (distance < 5)    return "2 分鐘";
+    if (distance < 10)   return "6 分鐘";
+    if (distance < 25)   return "11 分鐘";
+    if (distance < 30)   return "14 分鐘";
+    if (distance < 65)   return "22 分鐘";
+    if (distance < 81)   return "25 分鐘";
+    if (distance < 100)  return "35 分鐘";
+    if (distance < 250)  return "45 分鐘";
+    if (distance < 500)  return "60 分鐘 (1 小時)";
+    if (distance < 750)  return "75 分鐘 (1 小時 15 分)";
+    if (distance < 1000) return "90 分鐘 (1 小時 30 分)";
+    return "120 分鐘 (2 小時)"; // 上限
+  }
+
+  // 2. 真實移動估算邏輯
+  function calculateRealTravelTime(distance) {
+    distance = Math.abs(distance);
+    if (distance <= 0) return "已經抵達";
+
+    // 加入 1.3 倍的道路曲折係數，將直線距離換算成約略的實際道路距離
+    const roadDistance = distance * 1.3;
+
+    if (distance < 2) {
+      // < 2公里：步行 (假設時速 5 km/h -> 每公里 12 分鐘)
+      const mins = Math.round(roadDistance * 12);
+      return `約 ${mins} 分鐘 (步行)`;
+    } else if (distance < 50) {
+      // 2~50公里：市區/郊區開車 (假設時速 40 km/h -> 每公里 1.5 分鐘)
+      const mins = Math.round(roadDistance * 1.5);
+      const hours = Math.floor(mins / 60);
+      const remainMins = mins % 60;
+      return hours > 0 ? `約 ${hours} 小時 ${remainMins} 分鐘 (開車)` : `約 ${mins} 分鐘 (開車)`;
+    } else if (distance < 500) {
+      // 50~500公里：高速公路開車 (假設時速 90 km/h -> 每公里 0.67 分鐘)
+      // 高速公路通常比較直，曲折係數降為 1.15
+      const highwayDistance = distance * 1.15;
+      const mins = Math.round(highwayDistance * 0.67);
+      const hours = Math.floor(mins / 60);
+      const remainMins = mins % 60;
+      return `約 ${hours} 小時 ${remainMins} 分鐘 (開車)`;
+    } else {
+      // > 500公里：搭乘飛機 (假設時速 800 km/h) + 2小時機場報到安檢時間
+      const flightHours = (distance / 800) + 2;
+      const hours = Math.floor(flightHours);
+      const mins = Math.round((flightHours - hours) * 60);
+      return `約 ${hours} 小時 ${mins} 分鐘 (搭機飛行)`;
+    }
+  }
 </script>
 
 <body>
@@ -186,7 +191,9 @@ function calculateCooldownTime(distance) {
       <md-filled-button id="ok" onclick="ok()">計算</md-filled-button>
       <md-outlined-button id="clean" onclick="clean()">清除</md-outlined-button>
     </div>
-    <h1 id="cooldown"></h1>
+    
+    <h2 id="cooldown" style="color: #d32f2f; margin-top: 20px;"></h2>
+    <h3 id="realtime" style="color: #1976d2; margin-top: 10px;"></h3>
   </div>
 </body>
 </html>
